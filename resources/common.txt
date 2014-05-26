@@ -1,0 +1,26 @@
+title Gamma Assault
+tileset-def map_tileset.txt
+tileset-file map_tiles.png
+
+unit-font Caudex-Regular.ttf
+unit-font-size 16
+message-font Caudex-Regular.ttf
+message-font-size 12
+sign-font Caudex-Regular.ttf
+sign-font-size 16
+
+max-world-size 30 20
+
+map-offset 2 2
+tile-size 32 32
+
+
+
+message-offset 5 15
+
+display-size 870 600
+
+
+
+repaint-milliseconds 300
+
