@@ -1,17 +1,13 @@
 (ns gamma.core
   (:import (javax.swing JFrame))
   (:require [gamma.gui :as gui]
+            [gamma.launcher :as launcher]
             [gamma.common :as common]))
            
 
-(defn -main
-  "I don't do a whole lot ... yet."
-  [& args]
-  (println "Hello, World!"))
-
 (defn main-window
-  []
-  (def frame (doto (JFrame. (clojure.string/join " " (common/get-property :title)))
+  [title]
+  (def frame (doto (JFrame. title)
                (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE )
               ))
 
@@ -28,7 +24,11 @@
 
     ))
 
+
+
 (defn main
   []
   (common/load-common-properties)
-  (main-window))                 
+  (let [title (clojure.string/join " " (common/get-property :title))]
+    ;(main-window title)))                 
+    (launcher/launcher-window title)))                 
