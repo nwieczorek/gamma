@@ -1,21 +1,40 @@
 (ns gamma.launcher
-  (:import (javax.swing JFrame JComboBox JLabel JButton JPanel)
+  (:import (javax.swing JFrame JComboBox JLabel JButton JPanel ImageIcon)
            (javax.swing.border EmptyBorder)
-           (java.awt FlowLayout GridLayout )
+           (java.awt FlowLayout GridLayout Dimension )
            (java.awt.event ActionListener))
-  (:require [gamma.common :as common]))
+  (:require [gamma.common :as common]
+            [gamma.tileset :as tileset]
+            [gamma.gui :as gui]))
 
 (defn load-map-file-list
   []
   (common/get-resource-list "/maps/"))
 
+(defn main-window
+  [resources]
+  (def frame (doto (JFrame. (:title resources))
+               (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE )
+              ))
+
+  (let [insets (.getInsets frame)
+        [pnl timer] (gui/main-panel resources)
+        [display-width display-height] (common/get-property :display-size)]
+      (.setContentPane frame pnl)
+      (.validate frame)
+      (.repaint frame)
+      (.setVisible frame true)
+      (.setSize frame (+ (.left insets) (.right insets) display-width ) 
+                      (+ (.top insets) (.bottom insets) display-height  ))
+      (.start timer)
+
+    ))
 
 (def player-options (list "Human" "Computer"))
-(def factions (list "Metal Militia" "Reborn Sons"))
 
 (defn launcher-window
-  [title]
-  (def launcher (doto (JFrame. title)
+  [resources]
+  (def launcher (doto (JFrame. (:title resources))
                (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE )
               ))
   (let [insets (.getInsets launcher)
@@ -30,7 +49,8 @@
         player-a-faction-combo (JComboBox.)
         player-b-faction-combo (JComboBox.)
         go-button (JButton. "Start")
-        p (JPanel.)]
+        p (JPanel.)
+        launcher-border (common/get-property :launcher-border)]
 
       ;add the items to the map-file-combo
       (doseq [map-file (load-map-file-list)]
@@ -43,14 +63,16 @@
       (.setSelectedItem player-a-control-combo (first player-options))
       (.setSelectedItem player-b-control-combo (second player-options))
 
-      (doseq [faction factions]
-        (.addItem player-a-faction-combo faction)
-        (.addItem player-b-faction-combo faction))
+
+      (doseq [faction (:factions resources)]
+        (.addItem player-a-faction-combo (ImageIcon. (tileset/get-tile :unit (:icon-key faction))))
+        (.addItem player-b-faction-combo (ImageIcon. (tileset/get-tile :unit (:icon-key faction))))
+        )
 
 
 
       (.setContentPane launcher p)
-      (.setBorder p (EmptyBorder. 10 10 10 10))
+      (.setBorder p (EmptyBorder. launcher-border launcher-border launcher-border launcher-border ))
       (.setLayout p (GridLayout. 5 2 grid-horizontal-space grid-vertical-space))
       (.add p map-label)
       (.add p map-file-combo)
@@ -71,10 +93,15 @@
       (.addActionListener go-button 
                           (proxy [ActionListener] []
                             (actionPerformed [event]
-                              (prn "Button clicked")
-                              (prn (str "A:" (.getSelectedItem player-a-control-combo)))
-                              (prn (str "B:" (.getSelectedItem player-b-control-combo)))
-                              (prn event))))
+                              (let [new-resources (assoc resources 
+                                                         :player-a-control (.getSelectedItem player-a-control-combo)
+                                                         :player-b-control (.getSelectedItem player-b-control-combo)
+                                                         :player-a-faction (.getSelectedItem player-a-faction-combo)
+                                                         :player-b-faction (.getSelectedItem player-b-faction-combo)
+                                                         :map-file (.getSelectedItem map-file-combo))]
+                                (main-window new-resources))
+                              (.setVisible launcher false)
+                              )))
 
     ))
 

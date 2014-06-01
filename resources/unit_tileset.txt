@@ -1,0 +1,24 @@
+
+green-heavy 0 1
+green-tactical 1 1
+green-assault 2 1
+green-special 3 1
+green-blank 5 1
+
+blue-heavy 0 2
+blue-tactical 1 2
+blue-assault 2 2
+blue-special 3 2
+blue-blank 5 2
+
+red-heavy 0 3
+red-tactical 1 3
+red-assault 2 3
+red-special 3 3
+red-blank 5 3
+
+purple-heavy 0 4
+purple-tactical 1 4
+purple-assault 2 4
+purple-special 3 4
+purple-blank 5 4

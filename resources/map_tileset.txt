@@ -6,7 +6,3 @@ selection 3 0
 
 
 wall 3 1
-green-unit 5 1
-blue-unit 6 1
-red-unit 7 1
-purple-unit 8 1

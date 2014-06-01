@@ -1,0 +1,10 @@
+
+factions red green blue purple
+
+red-name Red Rushers
+
+green-name Green Groggers
+
+blue-name Blue Blobbers
+
+purple-name Purple Pushers

@@ -1,5 +1,6 @@
 (ns gamma.tileset
   (:import (java.io BufferedReader FileReader InputStreamReader)
+           (javax.swing ImageIcon)
            javax.imageio.ImageIO)
   (:require [gamma.common :as common]))
 
@@ -36,15 +37,22 @@
         ts-def (common/load-property-file def-filename )
         tile-image-file image-filename
         _ (prn (str "loading " tile-image-file))
-        full-image (ImageIO/read (.getResource load-class (str "/" tile-image-file)) )]
+        full-image (ImageIO/read (.getResource load-class (str "/" tile-image-file)) )
+        ]
 
     (reduce (get-image-tiler full-image ts-def tile-size) {} (keys ts-def))
     ))
 
 
+(def ^:dynamic *common-tilesets* (atom nil))
 
-(defn main
-  []
-  (common/load-common-properties)
-  (prn (load-tileset (common/get-property :tileset-def) (common/get-property :tileset-file) (common/get-property :tile-size) ))
-  )
+(defn load-common-tileset
+  [def-filename image-filename tile-size tileset-key]
+  (let [new-tileset (load-tileset def-filename image-filename tile-size)]
+    (reset! *common-tilesets* (assoc @*common-tilesets* tileset-key new-tileset))))
+
+(defn get-tile
+  [tileset-key image-key]
+  ((@*common-tilesets* tileset-key) image-key))
+
+

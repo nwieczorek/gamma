@@ -1,6 +1,9 @@
 title Gamma Assault
-tileset-def map_tileset.txt
-tileset-file map_tiles.png
+map-tileset-def map_tileset.txt
+map-tileset-file map_tiles.png
+unit-tileset-def unit_tileset.txt
+unit-tileset-file unit_tiles.png
+faction-def factions.txt
 
 unit-font Caudex-Regular.ttf
 unit-font-size 16
@@ -14,12 +17,14 @@ max-world-size 30 20
 map-offset 2 2
 tile-size 32 32
 
-
+preferred-combo-height 170
 
 message-offset 5 15
 
 display-size 870 600
-
+launcher-size 500 250
+launcher-spacing 10 10
+launcher-border 10
 
 
 repaint-milliseconds 300

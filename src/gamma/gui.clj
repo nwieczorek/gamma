@@ -58,25 +58,21 @@
 
 ;=========================================================================
 (defn main-panel
-  []
-  (let [[world-width world-height] (common/get-property :max-world-size)
+  [resources]
+  (let [[max-world-width max-world-height] (common/get-property :max-world-size)
         [tile-width tile-height] (common/get-property :tile-size)
         [tile-offset-x tile-offset-y] (common/get-property :map-offset)
         unit-font (load-font (common/get-property :unit-font) (common/get-property :unit-font-size))
         unit-bold-font (load-font (common/get-property :unit-font) Font/BOLD (common/get-property :unit-font-size))
         message-font (load-font (common/get-property :message-font) (common/get-property :message-font-size))
         [message-offset-x message-offset-y-raw] (common/get-property :message-offset)
-        world (atom (grid/make-world "maps/test_map.txt" world-width world-height))
+        world (atom (grid/make-world (str "maps/" (:map-file resources)) max-world-width max-world-height))
         message-offset-y  (+ message-offset-y-raw (* tile-height (+ 1 (:height @world)))) 
 
         hover-cell (atom nil)
         message-text (atom "Hi There")
         active-cells (atom nil)
         current-state (atom {:name :start-play})
-        
-        map-tileset (tileset/load-tileset (common/get-property :tileset-def) 
-                                          (common/get-property :tileset-file) 
-                                          (common/get-property :tile-size))
         ]
         
         (defn update
@@ -141,13 +137,13 @@
                         @world
                         (fn [cell]
                           (let [[ix iy] (translate-cell-to-coord (:x cell) (:y cell) tile-width tile-height tile-offset-x tile-offset-y)
-                                image ((:terrain cell) map-tileset)]
+                                image (tileset/get-tile :map (:terrain cell))]
                             (.drawImage g2d image ix iy this)
                                
                             (when (not (nil? @hover-cell))
                               (let [[h-x h-y] @hover-cell]
                                 (when (and (= h-x (:x cell)) (= h-y (:y cell)))
-                                  (.drawImage g2d (:hover map-tileset) ix iy this))))
+                                  (.drawImage g2d (tileset/get-tile :map :hover) ix iy this))))
                             )))
                       (draw-message g2d this)
                       )))
