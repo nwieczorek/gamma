@@ -1,0 +1,14 @@
+START MAP
+                    
+  XXX   XXX    XXX  
+  X     X X    X   X
+        X      X   X
+  XXX     XXXX    XX
+                    
+END MAP
+
+START PLACEMENT
+2 3 A H
+16 3 B T
+END PLACEMENT
+

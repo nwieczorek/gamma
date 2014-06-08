@@ -1,7 +1,8 @@
 
 (ns gamma.grid
   (:import (java.io BufferedReader FileReader InputStreamReader))
-  (:require [gamma.common :as common]))
+  (:require [gamma.unit :as unit]
+            [gamma.common :as common]))
 
 
 (defn make-grid-cells
@@ -106,44 +107,91 @@
            x-coord 0]
       (if (empty? line)
         the-map
-        (let [c (first line)]
+        (let [c (first line)
+              cell-key (get-coord-key x-coord y-coord)]
           (recur (rest line)
             (case c
-              \X (assoc the-map (get-coord-key x-coord y-coord) :wall)
+              \X (assoc the-map cell-key :wall)
               the-map)
             (+ x-coord 1))
           )))))
 
 
-(defn load-map-file
+(defn resolve-placement-line
+  "Helper function for loading scenario files
+  Parse the unit placement lines"
+  [def-place full-line]
+  (if (clojure.string/blank? full-line)
+    def-place
+    (let [tokens (map read-string (clojure.string/split full-line #"\s+"))
+          _ (assert (= (count tokens) 4) (str "Invalid Placement " full-line))
+          x (first tokens)
+          y (nth tokens 1)
+          player (keyword (nth tokens 2))
+          unit-type (keyword (nth tokens 3))
+          the-key (get-coord-key x y)]
+      (assoc def-place the-key {:player (keyword player) :unit-type unit-type}))
+  ))
+
+(defn load-scenario-file
   [filename]
   (let [load-class (.getClass (Thread/currentThread))
-        istream (.getResourceAsStream load-class (str "/" filename))
+        istream (.getResourceAsStream load-class filename)
         _ (assert (not (nil? istream)) (str "Could not open stream for " filename)) ]
     (with-open [rdr (BufferedReader. (InputStreamReader. istream))]
       (loop [lines (line-seq rdr)
              def-map {}
+             def-place {}
              y-coord 0
-             width-max 0]
-        (if (empty? lines)
-          [def-map width-max (+ 1 y-coord)] 
-          (recur (rest lines) 
-                 (resolve-map-line def-map y-coord (first lines)) 
-                 (+ y-coord 1) 
-                 (max (count (first lines)) width-max)))
+             width-max 0
+             section :none]
+        (prn (str "section:" section " line:" (first lines)))
+        (cond 
+          (empty? lines) [def-map def-place width-max (+ 1 y-coord)]
+          (= (first lines) "START MAP") (recur (rest lines) def-map def-place y-coord width-max :map)
+          (= (first lines) "END MAP") (recur (rest lines) def-map def-place y-coord width-max :none)
+          (= (first lines) "START PLACEMENT") (recur (rest lines) def-map def-place y-coord width-max :placement)
+          (= (first lines) "END PLACEMENT") (recur (rest lines) def-map def-place y-coord width-max :none)
+          (= section :map)
+            (recur (rest lines) 
+                   (resolve-map-line def-map y-coord (first lines))
+                   def-place 
+                   (+ y-coord 1) 
+                   (max (count (first lines)) width-max)
+                   section)
+          (= section :placement)
+            (recur (rest lines)
+                   def-map
+                   (resolve-placement-line def-place (first lines))
+                   y-coord
+                   width-max
+                   section)
+          :default 
+            (recur (rest lines) def-map def-place y-coord width-max section)
+          )
           ))))
 
       
 
 (defn make-world
-  [filename max-width max-height]
-  (let [[def-map width height] (load-map-file filename)
-        _ (prn width "," height)
-        the-grid (update-grid
+  [filename max-width max-height faction-map ]
+  (let [[def-map def-place width height] (load-scenario-file filename)
+        ;_ (prn width "," height)
+        mapped-grid (update-grid
                         (make-grid (min width max-width) (min height max-height) {:terrain :clear})
                         (fn [x y cell]
-                          (if-let [terrain (def-map (get-coord-key x y))]
-                            (assoc cell :terrain terrain))))
+                          (if-let [cell-object (def-map (get-coord-key x y))]
+                            (assoc cell :terrain cell-object)
+                            cell
+                              )))
+        the-grid (update-grid
+                   mapped-grid
+                   (fn [x y cell]
+                     (if-let [placement (def-place (get-coord-key x y))]
+                       (let [u (unit/make-unit-from-placement placement 
+                                                              (faction-map (:player placement)))]
+                        (assoc cell :unit u))
+                       cell)))
                       ]
     the-grid))
 

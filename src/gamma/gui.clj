@@ -56,6 +56,10 @@
        (.drawString g2d text x y)))
 
 
+
+;=========================================================================
+(def STATE-PLACEMENT :placement)
+
 ;=========================================================================
 (defn main-panel
   [resources]
@@ -66,13 +70,16 @@
         unit-bold-font (load-font (common/get-property :unit-font) Font/BOLD (common/get-property :unit-font-size))
         message-font (load-font (common/get-property :message-font) (common/get-property :message-font-size))
         [message-offset-x message-offset-y-raw] (common/get-property :message-offset)
-        world (atom (grid/make-world (str "maps/" (:map-file resources)) max-world-width max-world-height))
+
+        faction-map {:A (:player-a-faction resources) :B (:player-b-faction resources)}
+
+        world (atom (grid/make-world (str (common/get-property :scenario-folder) (:scenario-file resources)) max-world-width max-world-height faction-map))
         message-offset-y  (+ message-offset-y-raw (* tile-height (+ 1 (:height @world)))) 
 
         hover-cell (atom nil)
         message-text (atom "Hi There")
         active-cells (atom nil)
-        current-state (atom {:name :start-play})
+        current-state (atom STATE-PLACEMENT)
         ]
         
         (defn update
@@ -107,7 +114,7 @@
               (cond (= event-type :world)
                     (do
                       (prn (str "Clicked on cell " cell-x "," cell-y))
-                      (case (@current-state :name)
+                      (case @current-state 
                         :start-play
                           (do
                             (prn "start play")
@@ -137,8 +144,12 @@
                         @world
                         (fn [cell]
                           (let [[ix iy] (translate-cell-to-coord (:x cell) (:y cell) tile-width tile-height tile-offset-x tile-offset-y)
-                                image (tileset/get-tile :map (:terrain cell))]
-                            (.drawImage g2d image ix iy this)
+                                terrain-image (tileset/get-tile :map (:terrain cell))]
+                            (.drawImage g2d terrain-image ix iy this)
+                            (when-let [u (:unit cell)]
+                              (let [unit-image (tileset/get-tile :unit (:image-key u))]
+                                (.drawImage g2d unit-image ix iy this)))
+
                                
                             (when (not (nil? @hover-cell))
                               (let [[h-x h-y] @hover-cell]

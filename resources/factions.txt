@@ -2,9 +2,27 @@
 factions red green blue purple
 
 red-name Red Rushers
+red-tactical 1 2 
+red-heavy 3 4
+red-assault 5 6
+red-special 7 8
 
 green-name Green Groggers
+green-tactical 1 2 
+green-heavy 3 4
+green-assault 5 6
+green-special 7 8
 
 blue-name Blue Blobbers
+blue-tactical 1 2 
+blue-heavy 3 4
+blue-assault 5 6
+blue-special 7 8
 
 purple-name Purple Pushers
+purple-tactical 1 2 
+purple-heavy 3 4
+purple-assault 5 6
+purple-special 7 8
+
+

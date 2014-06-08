@@ -5,6 +5,8 @@ unit-tileset-def unit_tileset.txt
 unit-tileset-file unit_tiles.png
 faction-def factions.txt
 
+scenario-folder "/scenario/"
+
 unit-font Caudex-Regular.ttf
 unit-font-size 16
 message-font Caudex-Regular.ttf
